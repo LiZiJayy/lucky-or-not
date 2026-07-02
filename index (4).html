@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>潮汕投掷圣杯 · 纯前端版</title>
+  <style>
+    :root {
+      --ink: #190706;
+      --ink-2: #2a0b07;
+      --cinnabar: #8f1712;
+      --cinnabar-bright: #cf3525;
+      --lacquer: #360d09;
+      --gold: #f3c76a;
+      --gold-deep: #a86b24;
+      --paper: #f7dfae;
+      --paper-dark: #d3a75d;
+      --jade: #6f9c75;
+      --smoke: rgba(247, 223, 174, .54);
+      --soft: #ead0a2;
+      --dim: #b98f62;
+      --shadow: rgba(7, 0, 0, .58);
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--soft);
+      font-family: "Songti SC", "Noto Serif SC", "STSong", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(243, 199, 106, .17), transparent 22rem),
+        radial-gradient(circle at 82% 16%, rgba(207, 53, 37, .16), transparent 24rem),
+        linear-gradient(120deg, #100302 0%, #2a0806 42%, #0e0302 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(90deg, rgba(243, 199, 106, .04) 1px, transparent 1px),
+        linear-gradient(rgba(243, 199, 106, .035) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at 50% 16%, black 0%, transparent 72%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .16;
+      background:
+        repeating-linear-gradient(115deg, transparent 0 18px, rgba(247, 223, 174, .08) 19px 20px),
+        radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, .55));
+      mix-blend-mode: screen;
+    }
+
+    .temple-roof {
+      position: fixed;
+      left: 50%;
+      top: -78px;
+      width: min(1380px, 96vw);
+      height: 180px;
+      transform: translateX(-50%);
+      pointer-events: none;
+      opacity: .72;
+      filter: drop-shadow(0 28px 28px rgba(0,0,0,.42));
+      z-index: 0;
+    }
+
+    .temple-roof::before,
+    .temple-roof::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin: auto;
+    }
+
+    .temple-roof::before {
+      top: 34px;
+      width: 100%;
+      height: 112px;
+      clip-path: polygon(0 70%, 9% 57%, 17% 62%, 29% 38%, 50% 7%, 71% 38%, 83% 62%, 91% 57%, 100% 70%, 94% 86%, 6% 86%);
+      background: linear-gradient(180deg, #ab2a1f, #4a0f0a 82%);
+      border-bottom: 2px solid rgba(243,199,106,.45);
+    }
+
+    .temple-roof::after {
+      top: 122px;
+      width: 72%;
+      height: 34px;
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(90deg, transparent, rgba(243,199,106,.5), transparent), #2d0906;
+      box-shadow: inset 0 1px rgba(255, 231, 163, .32);
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: 1280px;
+      max-width: calc(100vw - 72px);
+      margin: 0 auto;
+      padding: 46px 0 54px;
+    }
+
+    .masthead {
+      display: block;
+      margin: 54px 0 28px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      width: fit-content;
+      padding: 9px 16px;
+      color: var(--gold);
+      background: linear-gradient(90deg, rgba(143, 23, 18, .72), rgba(70, 14, 8, .42));
+      border-top: 1px solid rgba(243,199,106,.46);
+      border-bottom: 1px solid rgba(243,199,106,.22);
+      letter-spacing: .22em;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .kicker::before, .kicker::after {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+
+    .kicker::after { background: linear-gradient(90deg, var(--gold), transparent); }
+
+    h1 {
+      margin: 18px 0 14px;
+      color: #ffe7a7;
+      font-size: 82px;
+      line-height: .92;
+      letter-spacing: .08em;
+      font-weight: 900;
+      text-shadow:
+        0 2px 0 #672014,
+        0 8px 22px rgba(0,0,0,.52),
+        0 0 48px rgba(243,199,106,.14);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .seal {
+      width: 82px;
+      height: 82px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: #ffe7a7;
+      font-size: 42px;
+      font-weight: 900;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.18), transparent),
+        var(--cinnabar);
+      border: 3px double rgba(255, 231, 163, .72);
+      transform: rotate(-8deg);
+      box-shadow: 0 18px 30px rgba(0,0,0,.42), inset 0 0 0 5px rgba(80, 7, 4, .38);
+    }
+
+    .intro {
+      max-width: 720px;
+      margin: 0;
+      color: #d8b782;
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .wish-card {
+      position: relative;
+      margin: 0 0 28px;
+      padding: 22px 28px 24px;
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 24px;
+      align-items: center;
+      background:
+        linear-gradient(90deg, rgba(87, 39, 12, .16), transparent 12% 88%, rgba(87, 39, 12, .16)),
+        linear-gradient(180deg, rgba(255, 232, 180, .96), rgba(217, 173, 102, .92));
+      color: #3a180b;
+      box-shadow: 0 24px 58px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.28);
+    }
+
+    .wish-card::before,
+    .wish-card::after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      bottom: -8px;
+      width: 18px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a0b05, #6d3214 55%, #2a0b05);
+      box-shadow: inset 2px 0 rgba(255, 220, 145, .25);
+    }
+
+    .wish-card::before { left: -9px; }
+    .wish-card::after { right: -9px; }
+
+    .wish-title {
+      position: relative;
+      z-index: 1;
+    }
+
+    .wish-title p {
+      margin: 0 0 8px;
+      color: rgba(58, 24, 11, .58);
+      font-size: 12px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .wish-title h2 {
+      margin: 0;
+      color: #8b1b12;
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: .16em;
+      font-weight: 900;
+    }
+
+    .wish-input-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    .wish-input {
+      width: 100%;
+      height: 58px;
+      border: 1px solid rgba(139, 27, 18, .24);
+      outline: none;
+      padding: 0 20px;
+      color: #3a180b;
+      background:
+        linear-gradient(180deg, rgba(255, 249, 226, .88), rgba(247, 220, 168, .82));
+      box-shadow: inset 0 2px 10px rgba(81, 34, 10, .12), 0 10px 24px rgba(80, 24, 8, .1);
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 750;
+      letter-spacing: .04em;
+    }
+
+    .wish-input::placeholder {
+      color: rgba(91, 43, 19, .38);
+    }
+
+    .wish-input:focus {
+      border-color: rgba(139, 27, 18, .58);
+      box-shadow: inset 0 2px 10px rgba(81, 34, 10, .12), 0 0 0 4px rgba(139, 27, 18, .12);
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 760px 1fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .camera-card {
+      position: relative;
+      min-height: 620px;
+      padding: 18px;
+      background:
+        linear-gradient(135deg, rgba(255, 231, 163, .12), transparent 38%),
+        linear-gradient(180deg, #3b0d08, #150403);
+      border: 1px solid rgba(243,199,106,.42);
+      box-shadow: 0 36px 90px rgba(0,0,0,.42), inset 0 0 0 8px rgba(15, 3, 2, .54);
+      overflow: hidden;
+    }
+
+    .camera-card::before {
+      content: "";
+      position: absolute;
+      inset: 13px;
+      border: 1px solid rgba(243,199,106,.26);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .camera-label {
+      position: absolute;
+      z-index: 5;
+      left: 34px;
+      top: 34px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffe4a0;
+      font-size: 13px;
+      letter-spacing: .18em;
+      writing-mode: vertical-rl;
+      background: rgba(22, 4, 3, .62);
+      padding: 14px 8px;
+      border: 1px solid rgba(243,199,106,.28);
+    }
+
+    .camera-label::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #d33827;
+      box-shadow: 0 0 0 4px rgba(211,56,39,.14), 0 0 18px rgba(211,56,39,.65);
+    }
+
+    .video-frame {
+      position: relative;
+      height: 100%;
+      min-height: 584px;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(243,199,106,.08), transparent 34%),
+        #0c0302;
+      overflow: hidden;
+    }
+
+    video, canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      filter: saturate(.92) contrast(1.06) sepia(.06);
+    }
+
+    canvas { pointer-events: none; display: none; }
+
+    .scan-line {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        linear-gradient(180deg, transparent, rgba(243,199,106,.15), transparent),
+        repeating-linear-gradient(180deg, transparent 0 4px, rgba(255,255,255,.025) 5px 6px);
+      mix-blend-mode: screen;
+      opacity: .58;
+    }
+
+    .gesture-guide {
+      position: absolute;
+      inset: 78px 92px 96px;
+      z-index: 2;
+      pointer-events: none;
+      border: 1px dashed rgba(243,199,106,.35);
+      opacity: .72;
+    }
+
+    .gesture-guide::before,
+    .gesture-guide::after {
+      content: "";
+      position: absolute;
+      bottom: 28%;
+      width: 72px;
+      height: 168px;
+      border-top: 4px solid rgba(243,199,106,.72);
+      border-left: 4px solid rgba(243,199,106,.72);
+      opacity: .72;
+      animation: handHint 1.8s var(--ease) infinite;
+    }
+
+    .gesture-guide::before {
+      left: 23%;
+      transform: rotate(24deg);
+      border-radius: 46px 0 0 0;
+    }
+
+    .gesture-guide::after {
+      right: 23%;
+      transform: scaleX(-1) rotate(24deg);
+      border-radius: 46px 0 0 0;
+      animation-delay: .12s;
+    }
+
+    @keyframes handHint {
+      0%, 100% { translate: 0 18px; opacity: .28; }
+      45% { translate: 0 -18px; opacity: .8; }
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(243,199,106,.16), transparent 34%),
+        linear-gradient(180deg, rgba(37, 8, 5, .92), rgba(10,2,1,.94));
+    }
+
+    .placeholder-inner {
+      width: 440px;
+      max-width: 80%;
+    }
+
+    .ritual-mark {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffe3a2;
+      font-size: 72px;
+      font-weight: 900;
+      background:
+        radial-gradient(circle, rgba(255,231,163,.18), transparent 55%),
+        conic-gradient(from 12deg, rgba(243,199,106,.12), rgba(143,23,18,.9), rgba(243,199,106,.2), rgba(143,23,18,.88), rgba(243,199,106,.12));
+      border: 1px solid rgba(243,199,106,.45);
+      box-shadow: 0 0 0 9px rgba(143,23,18,.25), 0 24px 55px rgba(0,0,0,.34);
+    }
+
+    .placeholder h2 {
+      margin: 0 0 12px;
+      color: #ffe5a7;
+      font-size: 34px;
+      letter-spacing: .12em;
+    }
+
+    .placeholder p {
+      margin: 0;
+      color: #d5b17c;
+      line-height: 1.8;
+    }
+
+    .status-strip {
+      position: absolute;
+      z-index: 7;
+      left: 44px;
+      right: 44px;
+      bottom: 42px;
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 18px;
+      color: #f8dd9d;
+      background: rgba(14, 3, 2, .76);
+      border: 1px solid rgba(243,199,106,.24);
+      box-shadow: 0 16px 36px rgba(0,0,0,.34);
+      backdrop-filter: blur(8px);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(243,199,106,.76);
+    }
+
+    .status-mode {
+      color: var(--dim);
+      letter-spacing: .12em;
+      font-size: 12px;
+    }
+
+    .oracle-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 620px;
+      background:
+        linear-gradient(180deg, rgba(255,231,163,.09), transparent 25%),
+        linear-gradient(180deg, #411008, #170403 72%);
+      border: 1px solid rgba(243,199,106,.38);
+      box-shadow: 0 36px 90px rgba(0,0,0,.36), inset 0 0 0 10px rgba(15,3,2,.5);
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .oracle-panel::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(243,199,106,.19);
+      pointer-events: none;
+    }
+
+    .plaque {
+      position: relative;
+      z-index: 1;
+      margin: 26px auto 0;
+      width: 260px;
+      padding: 12px 18px;
+      text-align: center;
+      color: #ffe6a8;
+      background: linear-gradient(180deg, #841914, #430b08);
+      border: 2px solid rgba(243,199,106,.42);
+      box-shadow: inset 0 0 0 4px rgba(20, 3, 2, .34), 0 18px 36px rgba(0,0,0,.28);
+      font-size: 22px;
+      letter-spacing: .24em;
+      font-weight: 900;
+    }
+
+    .altar {
+      position: relative;
+      z-index: 1;
+      margin: 30px 28px 0;
+      min-height: 300px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse at 50% 38%, rgba(243,199,106,.24), transparent 38%),
+        radial-gradient(ellipse at 50% 78%, rgba(0,0,0,.48), transparent 42%);
+      overflow: visible;
+    }
+
+    .incense {
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      width: 180px;
+      height: 210px;
+      transform: translateX(-50%);
+      pointer-events: none;
+      opacity: .72;
+    }
+
+    .smoke {
+      position: absolute;
+      bottom: 16px;
+      width: 24px;
+      height: 150px;
+      border-radius: 50%;
+      border-left: 2px solid var(--smoke);
+      filter: blur(.2px);
+      animation: smokeRise 5.5s ease-in-out infinite;
+    }
+
+    .smoke:nth-child(1) { left: 48px; animation-delay: -.8s; }
+    .smoke:nth-child(2) { left: 78px; height: 176px; animation-delay: -2s; }
+    .smoke:nth-child(3) { left: 108px; animation-delay: -3.4s; }
+
+    @keyframes smokeRise {
+      0% { transform: translateY(34px) scale(.76); opacity: 0; }
+      22% { opacity: .58; }
+      100% { transform: translateY(-66px) scale(1.45); opacity: 0; }
+    }
+
+    .table-ellipse {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      width: 340px;
+      height: 78px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(5,0,0,.72), transparent 68%);
+      filter: blur(2px);
+    }
+
+    .moon-blocks {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 28px;
+      align-items: flex-end;
+      transform: translateY(26px);
+    }
+
+    .cup {
+      --face-light: #f5c86c;
+      --face-dark: #7f3918;
+      --rim-highlight: rgba(255, 236, 176, .75);
+      --base-shadow: rgba(34, 7, 2, .55);
+      position: relative;
+      width: 126px;
+      height: 182px;
+      transform-origin: 50% 82%;
+      filter: drop-shadow(0 22px 18px rgba(0,0,0,.42));
+      will-change: transform;
+      backface-visibility: hidden;
+      transform-style: preserve-3d;
+      contain: layout paint;
+    }
+
+    .cup .shell-shape {
+      position: absolute;
+      inset: 0;
+      clip-path: path("M63 2 C101 2 124 33 118 75 C112 112 92 148 75 176 C69 184 57 184 51 176 C34 148 14 112 8 75 C2 33 25 2 63 2 Z");
+      background:
+        radial-gradient(circle at 33% 18%, rgba(255, 246, 208, .92), transparent 18%),
+        radial-gradient(circle at 52% 50%, rgba(255, 222, 150, .26), transparent 42%),
+        linear-gradient(152deg, #fff0ba 0%, var(--face-light) 26%, #c97c2f 62%, #6a3316 100%);
+      box-shadow:
+        inset -22px -30px 26px rgba(79, 26, 8, .4),
+        inset 18px 14px 18px rgba(255, 243, 190, .28),
+        inset 0 -8px 20px rgba(67, 24, 6, .3);
+      will-change: transform, filter;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+
+    .cup .shell-shape::before {
+      content: "";
+      position: absolute;
+      inset: 10px 14px 22px;
+      border-radius: 46% 46% 38% 38% / 24% 24% 60% 60%;
+      border: 1px solid rgba(255, 239, 190, .32);
+      opacity: .85;
+    }
+
+    .cup::before,
+    .cup::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      clip-path: path("M63 2 C101 2 124 33 118 75 C112 112 92 148 75 176 C69 184 57 184 51 176 C34 148 14 112 8 75 C2 33 25 2 63 2 Z");
+      pointer-events: none;
+      opacity: 0;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+      transform: translateZ(1px);
+    }
+
+    .cup::before {
+      background: linear-gradient(100deg, transparent 0 22%, rgba(255, 245, 198, .72) 42%, rgba(255, 232, 148, .2) 52%, transparent 72%);
+      mix-blend-mode: screen;
+    }
+
+    .cup::after {
+      background: linear-gradient(100deg, rgba(23, 4, 2, .34), transparent 36%, transparent 62%, rgba(23, 4, 2, .42));
+      mix-blend-mode: multiply;
+    }
+
+    .throwing .cup:first-child::before { animation: spinGlintLeft 2.28s linear both; }
+    .throwing .cup:last-child::before { animation: spinGlintRight 2.28s linear both; }
+    .throwing .cup:first-child::after { animation: spinShadeLeft 2.28s linear both; }
+    .throwing .cup:last-child::after { animation: spinShadeRight 2.28s linear both; }
+
+    .cup .inner-line {
+      position: absolute;
+      inset: 20px 28px 62px;
+      border-radius: 50%;
+      border: 3px solid rgba(99, 42, 13, .3);
+      border-bottom: 0;
+      opacity: .78;
+    }
+
+    .cup .inner-line::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 12px;
+      width: 30px;
+      height: 11px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: rgba(255, 248, 220, .58);
+      filter: blur(2px);
+    }
+
+    .cup .base-shadow {
+      position: absolute;
+      left: 50%;
+      bottom: 2px;
+      width: 74px;
+      height: 22px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(50, 13, 4, .72), transparent 72%);
+      opacity: .55;
+    }
+
+    .cup.face-up .shell-shape::after {
+      content: "圣";
+      position: absolute;
+      left: 50%;
+      top: 52px;
+      transform: translateX(-50%);
+      color: rgba(123, 27, 17, .78);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-shadow: 0 1px 0 rgba(255, 241, 204, .45);
+    }
+
+    .cup.face-down .shell-shape {
+      background:
+        radial-gradient(circle at 34% 18%, rgba(173, 108, 62, .42), transparent 18%),
+        repeating-linear-gradient(100deg, rgba(53, 18, 9, .18) 0 8px, rgba(111, 55, 23, .1) 8px 16px),
+        linear-gradient(152deg, #9b5828 0%, var(--face-dark) 34%, #4f200f 68%, #1f0905 100%);
+      box-shadow:
+        inset -18px -24px 22px rgba(0,0,0,.28),
+        inset 12px 8px 12px rgba(255, 197, 117, .08),
+        inset 0 -10px 18px rgba(18, 4, 2, .36);
+    }
+
+    .cup.face-down .shell-shape::after {
+      content: "";
+      position: absolute;
+      inset: 24px 28px 44px;
+      border-radius: 50% 50% 42% 42% / 46% 46% 52% 52%;
+      border: 2px solid rgba(255, 222, 165, .12);
+      opacity: .34;
+    }
+
+    .cup.face-down .inner-line { opacity: .12; }
+    .cup.face-down .base-shadow { opacity: .75; }
+
+    .throwing .cup:first-child { animation: castLeft 2.28s linear both; }
+    .throwing .cup:last-child { animation: castRight 2.28s linear both; }
+
+    @keyframes castLeft {
+      0% { transform: translate3d(0,0,0) rotate(var(--left-start-rot, -6deg)) scale(1); }
+      8% { transform: translate3d(calc(var(--left-rise-x, -42px) * .55), calc(var(--left-rise-y, -122px) * .55), 0) rotate(calc(var(--left-rot-1, -188deg) * .46)) scale(1.026); }
+      16% { transform: translate3d(var(--left-rise-x, -42px), var(--left-rise-y, -122px), 0) rotate(var(--left-rot-1, -188deg)) scale(1.045); }
+      26% { transform: translate3d(calc((var(--left-rise-x, -42px) + var(--left-peak-x, -112px)) / 2), calc((var(--left-rise-y, -122px) + var(--left-peak-y, -228px)) / 2), 0) rotate(calc((var(--left-rot-1, -188deg) + var(--left-rot-2, -372deg)) / 2)) scale(1.006); }
+      36% { transform: translate3d(var(--left-peak-x, -112px), var(--left-peak-y, -228px), 0) rotate(var(--left-rot-2, -372deg)) scale(.97); }
+      47% { transform: translate3d(calc((var(--left-peak-x, -112px) + var(--left-fall-x, 38px)) / 2), calc((var(--left-peak-y, -228px) - 18px) / 2), 0) rotate(calc((var(--left-rot-2, -372deg) + var(--left-rot-3, -548deg)) / 2)) scale(.992); }
+      58% { transform: translate3d(var(--left-fall-x, 38px), -18px, 0) rotate(var(--left-rot-3, -548deg)) scale(1.01); }
+      66% { transform: translate3d(calc((var(--left-fall-x, 38px) + var(--left-hit-x, 10px)) / 2), 2px, 0) rotate(calc((var(--left-rot-3, -548deg) + var(--left-final-rot, -612deg)) / 2)) scale(1.02, .982); }
+      72% { transform: translate3d(var(--left-hit-x, 10px), 10px, 0) rotate(var(--left-final-rot, -612deg)) scale(1.03, .965); }
+      79% { transform: translate3d(calc((var(--left-hit-x, 10px) + var(--left-bounce-x, -14px)) / 2), -6px, 0) rotate(calc((var(--left-final-rot, -612deg) + var(--left-bounce-rot, -606deg)) / 2)) scale(1.004); }
+      86% { transform: translate3d(var(--left-bounce-x, -14px), -18px, 0) rotate(var(--left-bounce-rot, -606deg)) scale(.99, 1.015); }
+      94% { transform: translate3d(var(--left-settle-x, 6px), 4px, 0) rotate(var(--left-settle-rot, -615deg)) scale(1.006, .995); }
+      100% { transform: translate3d(var(--left-final-x, 0px), 0, 0) rotate(var(--left-final-rot, -612deg)) scale(1); }
+    }
+
+    @keyframes castRight {
+      0% { transform: translate3d(0,0,0) rotate(var(--right-start-rot, 6deg)) scale(1); }
+      8% { transform: translate3d(calc(var(--right-rise-x, 46px) * .55), calc(var(--right-rise-y, -132px) * .55), 0) rotate(calc(var(--right-rot-1, 196deg) * .46)) scale(1.026); }
+      16% { transform: translate3d(var(--right-rise-x, 46px), var(--right-rise-y, -132px), 0) rotate(var(--right-rot-1, 196deg)) scale(1.045); }
+      26% { transform: translate3d(calc((var(--right-rise-x, 46px) + var(--right-peak-x, 124px)) / 2), calc((var(--right-rise-y, -132px) + var(--right-peak-y, -236px)) / 2), 0) rotate(calc((var(--right-rot-1, 196deg) + var(--right-rot-2, 394deg)) / 2)) scale(1.006); }
+      36% { transform: translate3d(var(--right-peak-x, 124px), var(--right-peak-y, -236px), 0) rotate(var(--right-rot-2, 394deg)) scale(.97); }
+      47% { transform: translate3d(calc((var(--right-peak-x, 124px) + var(--right-fall-x, -42px)) / 2), calc((var(--right-peak-y, -236px) - 16px) / 2), 0) rotate(calc((var(--right-rot-2, 394deg) + var(--right-rot-3, 574deg)) / 2)) scale(.992); }
+      58% { transform: translate3d(var(--right-fall-x, -42px), -16px, 0) rotate(var(--right-rot-3, 574deg)) scale(1.01); }
+      66% { transform: translate3d(calc((var(--right-fall-x, -42px) + var(--right-hit-x, -12px)) / 2), 3px, 0) rotate(calc((var(--right-rot-3, 574deg) + var(--right-final-rot, 638deg)) / 2)) scale(1.02, .982); }
+      72% { transform: translate3d(var(--right-hit-x, -12px), 12px, 0) rotate(var(--right-final-rot, 638deg)) scale(1.03, .965); }
+      79% { transform: translate3d(calc((var(--right-hit-x, -12px) + var(--right-bounce-x, 16px)) / 2), -6px, 0) rotate(calc((var(--right-final-rot, 638deg) + var(--right-bounce-rot, 644deg)) / 2)) scale(1.004); }
+      86% { transform: translate3d(var(--right-bounce-x, 16px), -20px, 0) rotate(var(--right-bounce-rot, 644deg)) scale(.99, 1.015); }
+      94% { transform: translate3d(var(--right-settle-x, -8px), 5px, 0) rotate(var(--right-settle-rot, 635deg)) scale(1.006, .995); }
+      100% { transform: translate3d(var(--right-final-x, 0px), 0, 0) rotate(var(--right-final-rot, 638deg)) scale(1); }
+    }
+
+
+    @keyframes spinGlintLeft {
+      0%, 6%, 100% { opacity: 0; transform: translate3d(-42%, 0, 1px) skewX(-12deg); }
+      12% { opacity: .48; transform: translate3d(18%, -2%, 1px) skewX(-10deg); }
+      24% { opacity: .08; transform: translate3d(54%, 0, 1px) skewX(-8deg); }
+      38% { opacity: .62; transform: translate3d(-28%, 1%, 1px) skewX(10deg); }
+      52% { opacity: .12; transform: translate3d(48%, -1%, 1px) skewX(8deg); }
+      68% { opacity: .44; transform: translate3d(-8%, 0, 1px) skewX(-6deg); }
+      82% { opacity: .16; transform: translate3d(36%, 0, 1px) skewX(5deg); }
+    }
+
+    @keyframes spinGlintRight {
+      0%, 7%, 100% { opacity: 0; transform: translate3d(42%, 0, 1px) skewX(12deg); }
+      14% { opacity: .46; transform: translate3d(-18%, -2%, 1px) skewX(10deg); }
+      28% { opacity: .1; transform: translate3d(-54%, 0, 1px) skewX(8deg); }
+      42% { opacity: .6; transform: translate3d(28%, 1%, 1px) skewX(-10deg); }
+      56% { opacity: .12; transform: translate3d(-48%, -1%, 1px) skewX(-8deg); }
+      70% { opacity: .42; transform: translate3d(8%, 0, 1px) skewX(6deg); }
+      84% { opacity: .16; transform: translate3d(-36%, 0, 1px) skewX(-5deg); }
+    }
+
+    @keyframes spinShadeLeft {
+      0%, 100% { opacity: .08; transform: translate3d(0, 0, 1px); }
+      14% { opacity: .34; transform: translate3d(-10%, 0, 1px); }
+      30% { opacity: .16; transform: translate3d(10%, 0, 1px); }
+      46% { opacity: .38; transform: translate3d(-8%, 0, 1px); }
+      62% { opacity: .14; transform: translate3d(8%, 0, 1px); }
+      76% { opacity: .3; transform: translate3d(-4%, 0, 1px); }
+      90% { opacity: .12; transform: translate3d(0, 0, 1px); }
+    }
+
+    @keyframes spinShadeRight {
+      0%, 100% { opacity: .08; transform: translate3d(0, 0, 1px); }
+      14% { opacity: .32; transform: translate3d(10%, 0, 1px); }
+      30% { opacity: .16; transform: translate3d(-10%, 0, 1px); }
+      46% { opacity: .36; transform: translate3d(8%, 0, 1px); }
+      62% { opacity: .14; transform: translate3d(-8%, 0, 1px); }
+      76% { opacity: .3; transform: translate3d(4%, 0, 1px); }
+      90% { opacity: .12; transform: translate3d(0, 0, 1px); }
+    }
+
+    .result-scroll {
+      position: relative;
+      z-index: 1;
+      margin: 0 34px 24px;
+      padding: 26px 28px 24px;
+      color: #3a180b;
+      background:
+        linear-gradient(90deg, rgba(87, 39, 12, .18), transparent 10% 90%, rgba(87, 39, 12, .18)),
+        linear-gradient(180deg, #ffe8b4, #d9ad66);
+      box-shadow: 0 24px 44px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.26);
+    }
+
+    .result-scroll::before,
+    .result-scroll::after {
+      content: "";
+      position: absolute;
+      left: -12px;
+      right: -12px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #6d3214, #2a0b05);
+      box-shadow: inset 0 2px rgba(255, 220, 145, .32);
+    }
+
+    .result-scroll::before { top: -9px; }
+    .result-scroll::after { bottom: -9px; }
+
+    .oracle-stamp {
+      position: absolute;
+      right: 24px;
+      top: 22px;
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      color: rgba(143, 23, 18, .72);
+      border: 3px solid rgba(143, 23, 18, .62);
+      transform: rotate(10deg);
+      font-weight: 900;
+      font-size: 24px;
+    }
+
+    .result-eyebrow {
+      margin: 0 0 8px;
+      color: rgba(58, 24, 11, .64);
+      font-size: 13px;
+      letter-spacing: .22em;
+    }
+
+    .result-title {
+      margin: 0 0 10px;
+      color: #8b1b12;
+      font-size: 46px;
+      line-height: 1;
+      letter-spacing: .18em;
+      font-weight: 900;
+    }
+
+    .question-line {
+      display: none;
+      width: 82%;
+      margin: 0 0 10px;
+      color: rgba(58, 24, 11, .66);
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 800;
+    }
+
+    .question-line.show { display: block; }
+
+    .question-line span {
+      color: #8b1b12;
+      font-weight: 900;
+    }
+
+    .result-desc {
+      width: 82%;
+      margin: 0;
+      color: #5a2b13;
+      font-size: 16px;
+      line-height: 1.78;
+      font-weight: 650;
+    }
+
+    .controls {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 0 34px 34px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      min-height: 54px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      transition: transform .18s var(--ease), filter .18s var(--ease), background .18s var(--ease);
+    }
+
+    .primary-btn {
+      color: #351006;
+      background: linear-gradient(180deg, #ffe8a8, #cc862d);
+      box-shadow: 0 18px 34px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.5);
+    }
+
+    .ghost-btn {
+      color: #ffe2a2;
+      background: rgba(255, 231, 163, .08);
+      border: 1px solid rgba(243,199,106,.28);
+    }
+
+    button:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    button:active { transform: translateY(0); }
+    button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      opacity: 0;
+      background: radial-gradient(circle at 50% 42%, rgba(255,231,163,.72), transparent 44%);
+    }
+
+    .flash.active { animation: flash .74s var(--ease); }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      18% { opacity: .78; }
+      100% { opacity: 0; }
+    }
+
+    .spark {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: #ffe2a2;
+      pointer-events: none;
+      box-shadow: 0 0 12px rgba(255,226,162,.85);
+      animation: spark 1.2s var(--ease) forwards;
+    }
+
+    .help-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      background: rgba(7, 1, 1, .58);
+      backdrop-filter: blur(10px);
+    }
+
+    .help-modal.open { display: grid; }
+
+    .help-card {
+      position: relative;
+      width: 560px;
+      padding: 34px 38px 32px;
+      color: #3a180b;
+      background:
+        linear-gradient(90deg, rgba(87, 39, 12, .16), transparent 10% 90%, rgba(87, 39, 12, .16)),
+        linear-gradient(180deg, #ffe8b4, #d9ad66);
+      box-shadow: 0 34px 90px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.32);
+    }
+
+    .help-card::before,
+    .help-card::after {
+      content: "";
+      position: absolute;
+      left: -14px;
+      right: -14px;
+      height: 20px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #6d3214, #2a0b05);
+      box-shadow: inset 0 2px rgba(255, 220, 145, .32);
+    }
+
+    .help-card::before { top: -10px; }
+    .help-card::after { bottom: -10px; }
+
+    .help-card h2 {
+      margin: 0 0 18px;
+      color: #8b1b12;
+      font-size: 34px;
+      letter-spacing: .12em;
+    }
+
+    .help-card ol {
+      margin: 0;
+      padding-left: 24px;
+      color: #5a2b13;
+      font-size: 17px;
+      line-height: 1.85;
+      font-weight: 650;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      color: #ffe2a2;
+      background: #8b1b12;
+      border: 1px solid rgba(58, 24, 11, .25);
+      box-shadow: 0 10px 20px rgba(0,0,0,.2);
+      letter-spacing: 0;
+    }
+
+    @keyframes spark {
+      from { transform: translate(0,0) scale(1); opacity: 1; }
+      to { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+    }
+
+    .pulse .result-scroll { animation: resultPulse 1.4s var(--ease); }
+
+    @keyframes resultPulse {
+      0% { transform: translateY(10px); filter: brightness(1); }
+      35% { transform: translateY(0); filter: brightness(1.13); }
+      100% { filter: brightness(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="temple-roof"></div>
+  <div id="flash" class="flash"></div>
+  <div id="helpModal" class="help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="help-card">
+      <button id="modalClose" class="modal-close" aria-label="关闭提示">×</button>
+      <h2 id="helpTitle">投掷提示</h2>
+      <ol>
+        <li>双手需要从肩膀下方快速移动到肩膀上方，如果未识别成功请多抛几次。</li>
+        <li>请保证全身入镜，包括肩膀与双臂。</li>
+        <li>建议在光线稳定的位置使用，人物与背景有对比会更容易识别。</li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <div class="kicker">Pure Frontend Ritual</div>
+        <div class="title-row">
+          <h1>投掷圣杯</h1>
+          <div class="seal" aria-hidden="true">杯</div>
+        </div>
+        <p class="intro">开启摄像头后，把上半身放入画面。双手从肩膀下方向上挥起，系统会在本地识别动作，随即触发圣杯飞掷、落定与结果解读。</p>
+      </div>
+    </header>
+
+    <section class="wish-card" aria-label="心念所问">
+      <div class="wish-title">
+        <p>Before Casting</p>
+        <h2>心念所问</h2>
+      </div>
+      <div class="wish-input-wrap">
+        <input id="wishInput" class="wish-input" type="text" maxlength="80" placeholder="今天能吃宵夜吗？" autocomplete="off" />
+      </div>
+    </section>
+
+    <section class="stage">
+      <section class="camera-card" aria-label="摄像头识别区">
+        <div class="camera-label">GESTURE SENSOR</div>
+        <div class="video-frame">
+          <video id="video" playsinline muted></video>
+          <canvas id="canvas"></canvas>
+          <div class="scan-line"></div>
+          <div id="guide" class="gesture-guide"></div>
+          <div id="placeholder" class="placeholder">
+            <div class="placeholder-inner">
+              <div class="ritual-mark">筊</div>
+              <h2>请启用摄像头</h2>
+              <p>授权后站在画面中央，让肩膀与双手完整入镜。识别成功时，右侧圣杯会自动飞起。</p>
+            </div>
+          </div>
+          <div class="status-strip">
+            <div class="status-dot"></div>
+            <div id="status">等待开启摄像头。</div>
+            <div id="mode" class="status-mode">STANDBY</div>
+          </div>
+        </div>
+      </section>
+
+      <aside id="oraclePanel" class="oracle-panel" aria-label="圣杯结果区">
+        <div class="plaque">潮汕圣杯</div>
+
+        <div id="altar" class="altar">
+          <div class="incense" aria-hidden="true">
+            <div class="smoke"></div>
+            <div class="smoke"></div>
+            <div class="smoke"></div>
+          </div>
+          <div class="table-ellipse"></div>
+          <div id="moonBlocks" class="moon-blocks">
+            <div id="cupA" class="cup face-up">
+              <div class="shell-shape"></div>
+              <div class="inner-line"></div>
+              <div class="base-shadow"></div>
+            </div>
+            <div id="cupB" class="cup face-up">
+              <div class="shell-shape"></div>
+              <div class="inner-line"></div>
+              <div class="base-shadow"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-scroll">
+          <div class="oracle-stamp">准</div>
+          <p class="result-eyebrow">ORACLE RESULT</p>
+          <h2 id="resultTitle" class="result-title">未投</h2>
+          <p id="questionLine" class="question-line">所问：<span id="questionText"></span></p>
+          <p id="resultDesc" class="result-desc">开启摄像头并完成双手上挥动作，或先点击手动投掷体验动画与结果。</p>
+        </div>
+
+        <div class="controls">
+          <button id="startBtn" class="primary-btn">开启摄像头</button>
+          <button id="manualBtn" class="ghost-btn">手动投掷</button>
+        </div>
+      </aside>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { FilesetResolver, PoseLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const placeholder = document.getElementById("placeholder");
+    const guide = document.getElementById("guide");
+    const statusEl = document.getElementById("status");
+    const modeEl = document.getElementById("mode");
+    const startBtn = document.getElementById("startBtn");
+    const manualBtn = document.getElementById("manualBtn");
+    const helpModal = document.getElementById("helpModal");
+    const modalClose = document.getElementById("modalClose");
+    const altar = document.getElementById("altar");
+    const oraclePanel = document.getElementById("oraclePanel");
+    const flash = document.getElementById("flash");
+    const wishInput = document.getElementById("wishInput");
+    const questionLine = document.getElementById("questionLine");
+    const questionText = document.getElementById("questionText");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultDesc = document.getElementById("resultDesc");
+    const cupA = document.getElementById("cupA");
+    const cupB = document.getElementById("cupB");
+
+    let poseLandmarker = null;
+    let running = false;
+    let lastVideoTime = -1;
+    let motionHistory = [];
+    let cooldownUntil = 0;
+    let isThrowing = false;
+    let audioContext = null;
+
+    const results = [
+      {
+        name: "圣杯",
+        desc: "一正一反。此象为允准、顺势、可以继续推进；若心中已有方向，可以稳妥行动。",
+        faces: ["up", "down"],
+        stamp: "准"
+      },
+      {
+        name: "笑杯",
+        desc: "两面皆正。此象为笑而不答、机缘未明；不妨静心片刻，换一种问法再试一次。",
+        faces: ["up", "up"],
+        stamp: "笑"
+      },
+      {
+        name: "阴杯",
+        desc: "两面皆反。此象为暂不允准、需要缓行；建议重新审视问题，或等待更合适的时机。",
+        faces: ["down", "down"],
+        stamp: "止"
+      }
+    ];
+
+    function setStatus(text, mode = "LISTENING") {
+      statusEl.textContent = text;
+      modeEl.textContent = mode;
+    }
+
+    function unlockAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === "suspended") audioContext.resume();
+    }
+
+    function playChime() {
+      if (!audioContext) return;
+      const now = audioContext.currentTime;
+      const notes = [196, 247, 330];
+      notes.forEach((freq, index) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + index * .075);
+        gain.gain.setValueAtTime(0, now + index * .075);
+        gain.gain.linearRampToValueAtTime(.12, now + index * .075 + .018);
+        gain.gain.exponentialRampToValueAtTime(.001, now + index * .075 + .72);
+        osc.connect(gain).connect(audioContext.destination);
+        osc.start(now + index * .075);
+        osc.stop(now + index * .075 + .78);
+      });
+    }
+
+    function playImpact() {
+      if (!audioContext) return;
+      const now = audioContext.currentTime;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(118, now);
+      osc.frequency.exponentialRampToValueAtTime(58, now + .22);
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(780, now);
+      gain.gain.setValueAtTime(.0001, now);
+      gain.gain.exponentialRampToValueAtTime(.18, now + .012);
+      gain.gain.exponentialRampToValueAtTime(.001, now + .28);
+      osc.connect(filter).connect(gain).connect(audioContext.destination);
+      osc.start(now);
+      osc.stop(now + .3);
+    }
+
+    function setThrowVariables() {
+      const root = document.documentElement;
+      const leftPeak = -220 - Math.random() * 62;
+      const rightPeak = -228 - Math.random() * 66;
+      const leftFinal = -596 - Math.random() * 46;
+      const rightFinal = 612 + Math.random() * 48;
+
+      root.style.setProperty("--left-start-rot", `${-8 + Math.random() * 8}deg`);
+      root.style.setProperty("--left-rise-x", `${-34 - Math.random() * 26}px`);
+      root.style.setProperty("--left-rise-y", `${-112 - Math.random() * 34}px`);
+      root.style.setProperty("--left-peak-x", `${-94 - Math.random() * 54}px`);
+      root.style.setProperty("--left-peak-y", `${leftPeak}px`);
+      root.style.setProperty("--left-fall-x", `${18 + Math.random() * 38}px`);
+      root.style.setProperty("--left-hit-x", `${4 + Math.random() * 14}px`);
+      root.style.setProperty("--left-bounce-x", `${-8 - Math.random() * 16}px`);
+      root.style.setProperty("--left-settle-x", `${Math.random() * 10}px`);
+      root.style.setProperty("--left-final-x", `${-4 + Math.random() * 8}px`);
+      root.style.setProperty("--left-rot-1", `${-178 - Math.random() * 58}deg`);
+      root.style.setProperty("--left-rot-2", `${-344 - Math.random() * 74}deg`);
+      root.style.setProperty("--left-rot-3", `${leftFinal + 58 + Math.random() * 34}deg`);
+      root.style.setProperty("--left-final-rot", `${leftFinal}deg`);
+      root.style.setProperty("--left-bounce-rot", `${leftFinal + 5 + Math.random() * 8}deg`);
+      root.style.setProperty("--left-settle-rot", `${leftFinal - 4 - Math.random() * 5}deg`);
+
+      root.style.setProperty("--right-start-rot", `${2 + Math.random() * 8}deg`);
+      root.style.setProperty("--right-rise-x", `${36 + Math.random() * 26}px`);
+      root.style.setProperty("--right-rise-y", `${-120 - Math.random() * 34}px`);
+      root.style.setProperty("--right-peak-x", `${102 + Math.random() * 58}px`);
+      root.style.setProperty("--right-peak-y", `${rightPeak}px`);
+      root.style.setProperty("--right-fall-x", `${-20 - Math.random() * 42}px`);
+      root.style.setProperty("--right-hit-x", `${-6 - Math.random() * 14}px`);
+      root.style.setProperty("--right-bounce-x", `${8 + Math.random() * 18}px`);
+      root.style.setProperty("--right-settle-x", `${-2 - Math.random() * 10}px`);
+      root.style.setProperty("--right-final-x", `${-4 + Math.random() * 8}px`);
+      root.style.setProperty("--right-rot-1", `${188 + Math.random() * 58}deg`);
+      root.style.setProperty("--right-rot-2", `${356 + Math.random() * 78}deg`);
+      root.style.setProperty("--right-rot-3", `${rightFinal - 62 - Math.random() * 36}deg`);
+      root.style.setProperty("--right-final-rot", `${rightFinal}deg`);
+      root.style.setProperty("--right-bounce-rot", `${rightFinal - 5 - Math.random() * 8}deg`);
+      root.style.setProperty("--right-settle-rot", `${rightFinal + 4 + Math.random() * 5}deg`);
+    }
+
+    async function initPose() {
+      if (poseLandmarker) return;
+      setStatus("正在加载姿态识别模型，请稍候。", "LOADING");
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+      );
+      poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+          delegate: "GPU"
+        },
+        runningMode: "VIDEO",
+        numPoses: 1
+      });
+    }
+
+    async function startCamera() {
+      try {
+        unlockAudio();
+        startBtn.disabled = true;
+        await initPose();
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        video.srcObject = stream;
+        await video.play();
+        placeholder.style.display = "none";
+        helpModal.classList.add("open");
+        running = true;
+        startBtn.textContent = "摄像头已开启";
+        setStatus("请站到画面中央，双手从肩膀下方向上挥起。", "READY");
+        requestAnimationFrame(detectLoop);
+      } catch (error) {
+        console.error(error);
+        startBtn.disabled = false;
+        setStatus("摄像头开启失败：请检查权限，并确认页面通过 HTTPS 或 localhost 打开。", "ERROR");
+      }
+    }
+
+    function detectLoop() {
+      if (!running || !poseLandmarker) return;
+
+      if (video.videoWidth && video.videoHeight) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+
+      const now = performance.now();
+      if (video.currentTime !== lastVideoTime) {
+        lastVideoTime = video.currentTime;
+        const result = poseLandmarker.detectForVideo(video, now);
+        drawAndAnalyze(result, now);
+      }
+      requestAnimationFrame(detectLoop);
+    }
+
+    function drawAndAnalyze(result, now) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!result.landmarks || !result.landmarks.length) {
+        setStatus("未检测到人体，请站到画面中央。", "SEARCHING");
+        return;
+      }
+
+      const landmarks = result.landmarks[0];
+
+      const leftShoulder = landmarks[11];
+      const rightShoulder = landmarks[12];
+      const leftWrist = landmarks[15];
+      const rightWrist = landmarks[16];
+
+      if (!leftShoulder || !rightShoulder || !leftWrist || !rightWrist) return;
+      if ([leftShoulder, rightShoulder, leftWrist, rightWrist].some(p => p.visibility !== undefined && p.visibility < 0.45)) {
+        setStatus("请让肩膀和双手完整入镜。", "ADJUST");
+        return;
+      }
+
+      guide.style.opacity = ".18";
+      const shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+      const wristY = (leftWrist.y + rightWrist.y) / 2;
+      const bothAboveShoulders = leftWrist.y < shoulderY - 0.055 && rightWrist.y < shoulderY - 0.055;
+
+      motionHistory.push({ t: now, y: wristY, above: bothAboveShoulders });
+      motionHistory = motionHistory.filter(item => now - item.t <= 900);
+
+      const earliest = motionHistory[0];
+      const movedUpFast = earliest && earliest.y - wristY > 0.17;
+      const startedBelow = motionHistory.some(item => item.y > shoulderY + 0.08);
+
+      if (!isThrowing && now > cooldownUntil && startedBelow && movedUpFast && bothAboveShoulders) {
+        triggerThrow();
+      } else if (!isThrowing) {
+        setStatus(bothAboveShoulders ? "双手已举起。放下后再向上挥动，可再次触发。" : "正在监听：请双手从肩膀下方向上挥起。", bothAboveShoulders ? "RAISED" : "READY");
+      }
+    }
+
+    function randomResult() {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      return results[array[0] % results.length];
+    }
+
+    function applyCupFaces(result) {
+      [
+        [cupA, result.faces[0]],
+        [cupB, result.faces[1]]
+      ].forEach(([cup, face]) => {
+        cup.classList.toggle("face-down", face === "down");
+        cup.classList.toggle("face-up", face !== "down");
+      });
+      document.querySelector(".oracle-stamp").textContent = result.stamp;
+    }
+
+    function resetCupFaces() {
+      [cupA, cupB].forEach((cup) => {
+        cup.classList.remove("face-down");
+        cup.classList.add("face-up");
+      });
+    }
+
+    function updateQuestionLine() {
+      const wish = wishInput.value.trim();
+      if (wish) {
+        questionText.textContent = wish;
+        questionLine.classList.add("show");
+      } else {
+        questionText.textContent = "";
+        questionLine.classList.remove("show");
+      }
+    }
+
+    function burstSparks() {
+      const rect = altar.getBoundingClientRect();
+      for (let i = 0; i < 26; i++) {
+        const spark = document.createElement("span");
+        spark.className = "spark";
+        spark.style.left = `${rect.left + rect.width / 2 + (Math.random() - .5) * 90}px`;
+        spark.style.top = `${rect.top + rect.height / 2 + (Math.random() - .5) * 70}px`;
+        spark.style.setProperty("--x", `${(Math.random() - .5) * 360}px`);
+        spark.style.setProperty("--y", `${(Math.random() - .8) * 260}px`);
+        document.body.appendChild(spark);
+        spark.addEventListener("animationend", () => spark.remove());
+      }
+    }
+
+    function triggerThrow() {
+      if (isThrowing) return;
+      unlockAudio();
+      isThrowing = true;
+      cooldownUntil = performance.now() + 3600;
+      const result = randomResult();
+
+      resultTitle.textContent = "飞掷";
+      resultDesc.textContent = "圣杯正在空中翻转，等待落定。";
+      updateQuestionLine();
+      setStatus("识别成功，圣杯已飞起。", "CASTING");
+
+      setThrowVariables();
+      oraclePanel.classList.remove("pulse");
+      altar.classList.remove("throwing");
+      void altar.offsetWidth;
+      altar.classList.add("throwing");
+      flash.classList.remove("active");
+      void flash.offsetWidth;
+      flash.classList.add("active");
+      burstSparks();
+      playChime();
+      resetCupFaces();
+
+      window.setTimeout(() => {
+        applyCupFaces(result);
+      }, 720);
+
+      window.setTimeout(() => {
+        playImpact();
+        burstSparks();
+      }, 1640);
+
+      window.setTimeout(() => {
+        altar.classList.remove("throwing");
+        oraclePanel.classList.add("pulse");
+        resultTitle.textContent = result.name;
+        resultDesc.textContent = result.desc;
+        setStatus("结果已落定。可以再次挥手，或点击手动投掷。", "COMPLETE");
+        motionHistory = [];
+        isThrowing = false;
+      }, 2280);
+    }
+
+    startBtn.addEventListener("click", startCamera);
+    manualBtn.addEventListener("click", triggerThrow);
+    wishInput.addEventListener("input", updateQuestionLine);
+    modalClose.addEventListener("click", () => helpModal.classList.remove("open"));
+    helpModal.addEventListener("click", (event) => {
+      if (event.target === helpModal) helpModal.classList.remove("open");
+    });
+  </script>
+</body>
+</html>
